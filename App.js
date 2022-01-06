@@ -1,4 +1,3 @@
-import { spreadElement } from '@babel/types';
 import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
@@ -6,9 +5,10 @@ import {
   View,
   ImageBackground,
   TouchableOpacity,
-  TextInput,
-  ScrollView,
+  Button
 } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 const App = () => {
 
@@ -51,56 +51,88 @@ const App = () => {
     },
   ];
 
-  const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [showScore, setShowScore] = useState(false);
-  const [score, setScore] = useState(0);
 
 
-  const handleAnswerOptionClick = (isCorrect) => {
-    if (isCorrect) {
-      setScore(score + 1);
-    }
 
-    const nextQuestion = currentQuestion + 1;
-    if (nextQuestion < questions.length) {
-      setCurrentQuestion(nextQuestion);
-    } else {
-      setShowScore(true);
-    }
-  };
-  console.log(questions[currentQuestion].answerOptions , 'adish')
-  return (
-    <View style={styles.container}>
+
+  const HomeScreen = ({navigation}) =>{
+    return (
+      <View style={styles.container}>  
       <View style={styles.card}>
-        {showScore ? (
-          <View style={styles.score}>
-            <Text style={{fontSize:30 , color:"#ffffff"}}>
-            You scored {score} out of {questions.length}
+       <View style={{flex:1 ,justifyContent:"center" , alignItems:"center"}}>
+       <Text style={{fontSize:24 , color:"#ffffff" , marginBottom:15}}>
+          Lets Start The quiz!
+        </Text>
+        <Button
+        title ="Start"
+        onPress={() => navigation.navigate('Quiz')}
+        />
+       </View>
+      </View>
+      </View>
+    )
+  }
+
+  const QuizScreen = ({navigation}) =>{
+
+    const [currentQuestion, setCurrentQuestion] = useState(0);
+    const [showScore, setShowScore] = useState(false);
+    const [score, setScore] = useState(0);
+
+    const handleAnswerOptionClick = (isCorrect) => {
+      if (isCorrect) {
+        setScore(score + 1);
+      }
+  
+      const nextQuestion = currentQuestion + 1;
+      if (nextQuestion < questions.length) {
+        setCurrentQuestion(nextQuestion);
+      } else {
+        setShowScore(true);
+      }
+    };
+    return(
+      <View style={styles.card}>
+      {showScore ? (
+        <View style={styles.score}>
+          <Text style={{fontSize:30 , color:"#ffffff"}}>
+          You scored {score} out of {questions.length}
+          </Text>
+        </View>
+      ) : (
+        <View style={{flex:1}}>
+        <View style={styles.questionSection}>
+          <View style={styles.questionCount}>
+            <Text style={styles.questionCountText}>
+              Question {currentQuestion + 1} / {questions.length}
             </Text>
           </View>
-        ) : (
-          <View style={{flex:1}}>
-          <View style={styles.questionSection}>
-            <View style={styles.questionCount}>
-              <Text style={styles.questionCountText}>
-                Question {currentQuestion + 1} / {questions.length}
-              </Text>
-            </View>
-            <View >
-            <Text style={styles.questionText}>{questions[currentQuestion].questionText}</Text>
-            </View>
+          <View >
+          <Text style={styles.questionText}>{questions[currentQuestion].questionText}</Text>
           </View>
-          <View style={styles.answerSection}> 
-            {questions[currentQuestion].answerOptions.map((answerOption ,id)=>  (
-              <TouchableOpacity key ={id} style={styles.button} onPress = {()=>handleAnswerOptionClick(answerOption.isCorrect)}>
-                 <Text style={styles.optionText}> {answerOption.answerText}</Text>
-              </TouchableOpacity>
-            ))}
-             </View>
-          </View>
-        )}
-      </View>
+        </View>
+        <View style={styles.answerSection}> 
+          {questions[currentQuestion].answerOptions.map((answerOption ,id)=>  (
+            <TouchableOpacity key ={id} style={styles.button} onPress = {()=>handleAnswerOptionClick(answerOption.isCorrect)}>
+               <Text style={styles.optionText}> {answerOption.answerText}</Text>
+            </TouchableOpacity>
+          ))}
+           </View>
+        </View>
+      )}
     </View>
+    )
+  }
+
+  const Stack = createNativeStackNavigator();
+
+  return (
+     <NavigationContainer>
+      <Stack.Navigator>
+        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="Quiz" component={QuizScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
 
@@ -109,7 +141,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#7cc6fe',
+    // backgroundColor: '#7cc6fe',
   },
   card: {
     backgroundColor: '#252d4a',
@@ -118,7 +150,6 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     padding: 20,
     flex: 1 / 2
-    // boxShadow: 10px 10px 42px 0px rgba(0, 0, 0, 0.75);
   },
   score: {
     flex: 1,
@@ -126,7 +157,6 @@ const styles = StyleSheet.create({
     alignItems : "center",
   },
   questionSection: {
-    // position: 'relative'
     flex:1/3
   },
   questionCount: {
@@ -151,7 +181,6 @@ const styles = StyleSheet.create({
     paddingHorizontal : 15 ,
     paddingVertical : 15 ,
     justifyContent: "flex-start" ,
-    // alignItems: "flex-start" ,
     flexDirection :"row",
     borderWidth : 5 ,
     borderColor : "#234668",
